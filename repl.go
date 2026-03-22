@@ -7,17 +7,35 @@ import (
 	"fmt"
 )
 
+var commands map[string]cliCommand
+
 func CleanInput(text string) []string {
 	words := strings.Fields(strings.ToLower(text))
 	return words
 }
 
 func StartREPL() {
+	initCommands()
+	cfg := &Config{}
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
 		scanner.Scan()
+
 		cleanText := CleanInput(scanner.Text())
-		fmt.Printf("Your command was: %s\n", cleanText[0])
+		if len(cleanText) == 0 {
+		continue
+		}
+		command, ok := commands[cleanText[0]]
+		if ok {
+			err := command.callback(cfg)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+		} else {
+			fmt.Println("Unknown command")
+			continue
+		}
 	}
 }
