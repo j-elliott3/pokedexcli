@@ -1,10 +1,12 @@
-package pokecache
+package pokeapi
 
 import (
 	"fmt"
 	"io"
 	"net/http"
 	"encoding/json"
+	"time"
+	"github.com/j-elliott3/pokedexcli/internal/pokecache"
 )
 
 
@@ -21,10 +23,16 @@ type LocationArea struct {
 }
 
 type Client struct {
-	cache *Cache
+	cache *pokecache.Cache
 }
 
-func (c *Client)pokeapiLocationAreaGET(url string) (LocationAreasResponse, error) {
+func NewClient(interval time.Duration) Client {
+	return Client{
+		cache: pokecache.NewCache(interval)
+	}
+}
+
+func (c *Client)LocationAreaGET(url string) (LocationAreasResponse, error) {
 	if data, ok := c.cache.Get(url); ok {
 		return unmarshalDataHelper(data)
 	}
@@ -50,7 +58,7 @@ func (c *Client)pokeapiLocationAreaGET(url string) (LocationAreasResponse, error
 
 func unmarshalDataHelper(body []byte) (LocationAreasResponse, error) {
 	locationAreas := LocationAreasResponse{}
-	err = json.Unmarshal(body, &locationAreas)
+	err := json.Unmarshal(body, &locationAreas)
 	if err != nil {
 		return LocationAreasResponse{}, err
 	}

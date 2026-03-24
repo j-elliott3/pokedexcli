@@ -5,10 +5,11 @@ import (
 	"bufio"
 	"os"
 	"fmt"
-	"github.com/j-elliott3/pokedexcli/internal/pokecache"
+	"time"
+	"github.com/j-elliott3/pokedexcli/internal/pokeapi"
 )
 
-var commands map[string]cliCommand
+var commands map[string]pokeapi.CliCommand
 
 func CleanInput(text string) []string {
 	words := strings.Fields(strings.ToLower(text))
@@ -16,8 +17,12 @@ func CleanInput(text string) []string {
 }
 
 func StartREPL() {
-	initCommands()
-	cfg := &Config{}
+	InitCommands()
+	interval := 5 * time.Minute
+	client := pokeapie.NewClient(interval)
+	cfg := &pokeapi.Config{
+		client: client
+	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for {
 		fmt.Print("Pokedex > ")
