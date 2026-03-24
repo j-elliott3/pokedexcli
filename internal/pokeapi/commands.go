@@ -1,23 +1,24 @@
-package main
+package pokeapi
 
 import (
 	"fmt"
 	"os"
 )
 
-type cliCommand struct {
+type CliCommand struct {
 	name        string
 	description string
 	callback    func(*Config) error
 }
 
 type Config struct {
+	client 		Client
 	Next 		*string
 	Previous 	*string
 }
 
-func initCommands() {
-	commands = map[string]cliCommand{
+func InitCommands() {
+	commands = map[string]CliCommand{
 		"exit": {
 			name:        "exit",
 			description: "Exit the Pokedex",
@@ -74,7 +75,7 @@ func commandMapb(cfg *Config) error {
 }
 
 func mapGetHelper(cfg *Config, url string) error {
-	locationAreas, err := pokeapiLocationAreaGET(url)
+	locationAreas, err := cfg.client.LocationAreaGET(url)
 	if err != nil {
 		return err
 	}

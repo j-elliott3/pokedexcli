@@ -28,7 +28,7 @@ type Client struct {
 
 func NewClient(interval time.Duration) Client {
 	return Client{
-		cache: pokecache.NewCache(interval)
+		cache: pokecache.NewCache(interval),
 	}
 }
 
