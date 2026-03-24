@@ -1,4 +1,4 @@
-package main
+package pokecache
 
 import (
 	"fmt"
@@ -20,7 +20,15 @@ type LocationArea struct {
     URL  string `json:"url"`
 }
 
-func pokeapiLocationAreaGET(url string) (LocationAreasResponse, error) {
+type Client struct {
+	cache *Cache
+}
+
+func (c *Client)pokeapiLocationAreaGET(url string) (LocationAreasResponse, error) {
+	if data, ok := c.cache.Get(url); ok {
+		return unmarshalDataHelper(data)
+	}
+	
 	res, err := http.Get(url)
 	if err != nil {
 		return LocationAreasResponse{}, err
@@ -35,7 +43,12 @@ func pokeapiLocationAreaGET(url string) (LocationAreasResponse, error) {
 	if err != nil {
 		return LocationAreasResponse{}, err
 	}
+	c.cache.Add(url, body)
 
+	return unmarshalDataHelper(body)
+}
+
+func unmarshalDataHelper(body []byte) (LocationAreasResponse, error) {
 	locationAreas := LocationAreasResponse{}
 	err = json.Unmarshal(body, &locationAreas)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"os"
 	"fmt"
+	"github.com/j-elliott3/pokedexcli/internal/pokecache"
 )
 
 var commands map[string]cliCommand
