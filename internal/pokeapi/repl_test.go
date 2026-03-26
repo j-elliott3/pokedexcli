@@ -22,7 +22,7 @@ func TestCleanInput(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := cleanInput(c.input)
+		actual := CleanInput(c.input)
 		if len(actual) != len(c.expected) {
 			t.Errorf("Length mismatch: got %d, want %d", len(actual), len(c.expected))
 		}

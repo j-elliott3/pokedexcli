@@ -37,11 +37,11 @@ func (cache *Cache)Add(key string, val []byte) {
 
 func (cache *Cache)Get(key string) ([]byte, bool) {
 	cache.mu.Lock()
+	defer cache.mu.Unlock()
 	entry, ok := cache.contents[key]
 	if !ok {
 		return []byte{}, false
 	}
-	defer cache.mu.Unlock()
 	return entry.val, true
 }
 
