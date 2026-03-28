@@ -1,7 +1,6 @@
 package pokeapi
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"encoding/json"
@@ -33,44 +32,7 @@ func NewClient(interval time.Duration) Client {
 }
 
 func (c *Client)LocationAreaGET(url string) (LocationAreasResponse, error) {
-	fmt.Println("debug: LocationAreaGET called with", url)
-	if data, ok := c.cache.Get(url); ok {
-		fmt.Println("debug: cache hit")
-		return unmarshalDataHelper[LocationAreasResponse](data)
-	}
-	
-	fmt.Println("debug: making HTTP request")
-	res, err := http.Get(url)
-	fmt.Println("debug: HTTP request returned")
-	if err != nil {
-		return LocationAreasResponse{}, err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	fmt.Println("debug: body read, length:", len(body))
-	fmt.Println("debug: status code:", res.StatusCode)
-	if res.StatusCode > 299 {
-		fmt.Printf("Response failed with status code %d\n", res.StatusCode)
-		return LocationAreasResponse{}, fmt.Errorf("Response error")
-	}
-	if err != nil {
-		return LocationAreasResponse{}, err
-	}
-	c.cache.Add(url, body)
-
-	fmt.Println("debug: about to unmarshal")
-	return unmarshalDataHelper[LocationAreasResponse](body)
-}
-
-func unmarshalDataHelper[T any](body []byte) (T, error) {
-	var result T
-	err := json.Unmarshal(body, &result)
-	if err != nil {
-		var zero T
-		return zero, err
-	}
-	return result, nil
+	return fetchAndCache[LocationAreasResponse](c, url)
 }
 
 type Location struct {
@@ -83,31 +45,53 @@ type Encounter struct {
 }
 type Pokemon struct {
 	Name string `json:"name"`
+	BaseExp int 	`json:"base_experience"`
 }
 
 var locationBaseURL = "https://pokeapi.co/api/v2/location-area/"
 
 func (c *Client)LocationGET(name string) (Location, error) {
 	locationURL := locationBaseURL + name 
-	if data, ok := c.cache.Get(locationURL); ok {
-		return unmarshalDataHelper[Location](data)
-	}
-	
-	res, err := http.Get(locationURL)
-	if err != nil {
-		return Location{}, err
-	}
-	defer res.Body.Close()
+	return fetchAndCache[Location](c, locationURL)
+}
 
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return Location{}, err
-	}
-	if res.StatusCode > 299 {
-		fmt.Printf("Response failed with status code %d\n", res.StatusCode)
-		return Location{}, fmt.Errorf("Response error")
-	}
-	c.cache.Add(locationURL, body)
+var pokemonURL = "https://pokeapi.co/api/v2/pokemon/"
 
-	return unmarshalDataHelper[Location](body)
+func (c *Client)pokemonGET(name string) (Pokemon, error) {
+	url := pokemonURL + name + "/"
+	return fetchAndCache[Pokemon](c, url)
+}
+
+
+
+func unmarshalDataHelper[T any](body []byte) (T, error) {
+	var result T
+	err := json.Unmarshal(body, &result)
+	if err != nil {
+		var zero T
+		return zero, err
+	}
+	return result, nil
+}
+
+func fetchAndCache[T any](c *Client, url string) (T, error) {
+    if data, ok := c.cache.Get(url); ok {
+        return unmarshalDataHelper[T](data)
+    }
+
+    res, err := http.Get(url)
+    if err != nil {
+        var zero T
+        return zero, err
+    }
+    defer res.Body.Close()
+
+    body, err := io.ReadAll(res.Body)
+    if err != nil {
+        var zero T
+        return zero, err
+    }
+
+    c.cache.Add(url, body)
+    return unmarshalDataHelper[T](body)
 }

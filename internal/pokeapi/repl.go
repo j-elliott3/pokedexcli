@@ -28,13 +28,11 @@ func StartREPL() {
 		scanner.Scan()
 
 		cleanText := CleanInput(scanner.Text())
-		fmt.Printf("debug: %v\n", cleanText)
 		if len(cleanText) == 0 {
 		continue
 		}
 		command, ok := commands[cleanText[0]]
 		if ok {
-			fmt.Printf("debug: calling command %s\n", cleanText[0])
 			err := command.callback(cfg, cleanText[1:]...)
 			if err != nil {
 				fmt.Println(err)

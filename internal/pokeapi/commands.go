@@ -3,6 +3,7 @@ package pokeapi
 import (
 	"fmt"
 	"os"
+	"math/rand"
 )
 
 type CliCommand struct {
@@ -44,6 +45,11 @@ func InitCommands() {
 			description: "Display pokemon in a specific location area",
 			callback: commandExplore,
 		},
+		"catch": {
+			name: 		"catch",
+			description: "Display pokeball throw and catch success result",
+			callback: commandCatch,
+		},
 	}
 }
 
@@ -82,8 +88,6 @@ func commandMapb(cfg *Config, args ...string) error {
 
 func mapGetHelper(cfg *Config, url string) error {
 	locationAreas, err := cfg.client.LocationAreaGET(url)
-	fmt.Println("debug: LocationAreaGET returned, count:", locationAreas.Count)
-    fmt.Println("debug: results length:", len(locationAreas.Results))
 	if err != nil {
 		return err
 	}
@@ -92,7 +96,6 @@ func mapGetHelper(cfg *Config, url string) error {
 	for _, result := range locationAreas.Results {
 		fmt.Println(result.Name)
 	}
-	fmt.Println("debug: mapGetHelper returning")
 	return nil
 }
 
@@ -108,5 +111,23 @@ func commandExplore(cfg *Config, args ...string) error {
 		fmt.Println(encounter.Pokemon.Name)
 	}
 	
+	return nil
+}
+
+func commandCatch(cfg *Config, args ...string) error {
+	if len(args) != 1 {
+		return fmt.Errorf("Expecting 1 argument")
+	}
+	fmt.Printf("Throwing a Pokeball at %s...\n", args[0])
+	pokemon, err := cfg.client.pokemonGET(args[0])
+	if err != nil {
+		return err
+	}
+	chance := rand.Intn(pokemon.BaseExp)
+	if chance < (pokemon.BaseExp/2) {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
+		return nil
+	}
+	fmt.Printf("%s was caught!\n", pokemon.Name)
 	return nil
 }
