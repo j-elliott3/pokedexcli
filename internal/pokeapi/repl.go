@@ -21,6 +21,7 @@ func StartREPL() {
 	client := NewClient(interval)
 	cfg := &Config{
 		client: client,
+		Pokedex: make(map[string]Pokemon),
 	}
 	scanner := bufio.NewScanner(os.Stdin)
 	for {

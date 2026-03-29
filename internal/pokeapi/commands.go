@@ -16,6 +16,7 @@ type Config struct {
 	client 		Client
 	Next 		*string
 	Previous 	*string
+	Pokedex		map[string]Pokemon
 }
 
 func InitCommands() {
@@ -49,6 +50,11 @@ func InitCommands() {
 			name: 		"catch",
 			description: "Display pokeball throw and catch success result",
 			callback: commandCatch,
+		},
+		"inspect": {
+			name: 		"inspect",
+			description: "Display information about specific caught pokemon",
+			callback: commandInspect,
 		},
 	}
 }
@@ -129,5 +135,31 @@ func commandCatch(cfg *Config, args ...string) error {
 		return nil
 	}
 	fmt.Printf("%s was caught!\n", pokemon.Name)
+	cfg.Pokedex[pokemon.Name] = pokemon
+	return nil
+}
+
+func commandInspect(cfg *Config, args ...string) error{
+	if len(args) != 1 {
+		return fmt.Errorf("Expecting 1 argument")
+	}
+	name := args[0]
+	pokemon, ok := cfg.Pokedex[name]; if !ok {
+		fmt.Printf("%s has not been caught!\n", name)
+		return nil
+	}
+	fmt.Printf("Name: %s\n", pokemon.Name)
+	fmt.Printf("Height: %d\n", pokemon.Height)
+	fmt.Printf("Weight: %d\n", pokemon.Weight)
+	
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats {
+		fmt.Printf("  -%s: %d\n", stat.Stat.Name, stat.BaseStat)
+	}
+
+	fmt.Println("Types:")
+	for _, pType := range pokemon.Types {
+		fmt.Printf("  - %s\n", pType.Type.Name)
+	}
 	return nil
 }

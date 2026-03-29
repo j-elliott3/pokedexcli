@@ -44,8 +44,29 @@ type Encounter struct {
 	Pokemon Pokemon `json:"pokemon"`
 }
 type Pokemon struct {
+	Name 		string `json:"name"`
+	BaseExp 	int `json:"base_experience"`
+	Height 		int	`json:"height"`
+	Weight 		int `json:"weight"`
+	Stats		[]Stat `json:"stats"`
+	Types		[]PokemonType `json:"types"`
+}
+type StatDetail struct {
 	Name string `json:"name"`
-	BaseExp int 	`json:"base_experience"`
+}
+
+type Stat struct {
+	BaseStat 	int `json:"base_stat"`
+	Stat		StatDetail `json:"stat"`
+	
+}
+
+type TypeDetail struct {
+	Name string `json:"name"`
+}
+
+type PokemonType struct {
+	Type 	TypeDetail `json:"type"`
 }
 
 var locationBaseURL = "https://pokeapi.co/api/v2/location-area/"
