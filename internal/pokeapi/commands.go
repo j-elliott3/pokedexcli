@@ -56,6 +56,11 @@ func InitCommands() {
 			description: "Display information about specific caught pokemon",
 			callback: commandInspect,
 		},
+		"pokedex": {
+			name: 		"pokedex",
+			description: "Display pokedex entries",
+			callback: commandPokedex,
+		},
 	}
 }
 
@@ -139,7 +144,7 @@ func commandCatch(cfg *Config, args ...string) error {
 	return nil
 }
 
-func commandInspect(cfg *Config, args ...string) error{
+func commandInspect(cfg *Config, args ...string) error {
 	if len(args) != 1 {
 		return fmt.Errorf("Expecting 1 argument")
 	}
@@ -161,5 +166,14 @@ func commandInspect(cfg *Config, args ...string) error{
 	for _, pType := range pokemon.Types {
 		fmt.Printf("  - %s\n", pType.Type.Name)
 	}
+	return nil
+}
+
+func commandPokedex(cfg *Config, args ...string) error {
+	fmt.Println("Your pokedex:")
+	for _, pokemon := range cfg.Pokedex {
+		fmt.Printf(" - %s\n", pokemon.Name)
+	}
+
 	return nil
 }
